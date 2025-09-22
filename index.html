@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Screenshot API Tester</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+        }
+        
+        .form-section {
+            padding: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #6b7280;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border: 2px dashed #e5e7eb;
+            border-radius: 8px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .result img {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .error {
+            color: #dc2626;
+            background: #fef2f2;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #dc2626;
+        }
+        
+        .success {
+            color: #059669;
+            background: #f0fdf4;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #059669;
+        }
+        
+        .download-btn {
+            margin-top: 15px;
+            background: #059669;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 Screenshot API</h1>
+            <p>Test your screenshot API with this interactive interface</p>
+        </div>
+        
+        <div class="form-section">
+            <form id="screenshotForm">
+                <div class="form-group">
+                    <label for="url">Website URL *</label>
+                    <input type="url" id="url" name="url" placeholder="https://example.com" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="width">Width (px)</label>
+                        <input type="number" id="width" name="width" value="1200" min="320" max="2560">
+                    </div>
+                    <div class="form-group">
+                        <label for="height">Height (px)</label>
+                        <input type="number" id="height" name="height" value="800" min="240" max="1440">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="format">Image Format</label>
+                        <select id="format" name="format">
+                            <option value="png">PNG</option>
+                            <option value="jpeg">JPEG</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="delay">Delay (ms)</label>
+                        <input type="number" id="delay" name="delay" value="0" min="0" max="10000" step="500">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="selector">CSS Selector (optional)</label>
+                    <input type="text" id="selector" name="selector" placeholder=".main-content, #header, etc.">
+                </div>
+                
+                <div class="form-row">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="fullPage" name="fullPage">
+                        <label for="fullPage">Full Page Screenshot</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="mobile" name="mobile">
+                        <label for="mobile">Mobile View</label>
+                    </div>
+                </div>
+                
+                <div class="checkbox-group">
+                    <input type="checkbox" id="darkMode" name="darkMode">
+                    <label for="darkMode">Dark Mode</label>
+                </div>
+                
+                <br>
+                <button type="submit" class="btn" id="submitBtn">
+                    📸 Take Screenshot
+                </button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <p>📸 Taking screenshot... This may take a few seconds.</p>
+            </div>
+            
+            <div class="result" id="result">
+                <p style="color: #9ca3af;">Screenshot will appear here</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('screenshotForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // Update dimensions when mobile is checked
+        document.getElementById('mobile').addEventListener('change', function() {
+            const width = document.getElementById('width');
+            const height = document.getElementById('height');
+            
+            if (this.checked) {
+                width.value = 375;
+                height.value = 667;
+            } else {
+                width.value = 1200;
+                height.value = 800;
+            }
+        });
+        
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const data = {};
+            
+            // Convert form data to object
+            for (let [key, value] of formData.entries()) {
+                if (key === 'fullPage' || key === 'mobile' || key === 'darkMode') {
+                    data[key] = true;
+                } else if (key === 'width' || key === 'height' || key === 'delay') {
+                    data[key] = parseInt(value) || 0;
+                } else {
+                    data[key] = value;
+                }
+            }
+            
+            // Add unchecked checkboxes as false
+            ['fullPage', 'mobile', 'darkMode'].forEach(key => {
+                if (!(key in data)) data[key] = false;
+            });
+            
+            // Remove empty selector
+            if (!data.selector) delete data.selector;
+            
+            // Show loading
+            loading.style.display = 'block';
+            result.innerHTML = '<p style="color: #9ca3af;">Taking screenshot...</p>';
+            submitBtn.disabled = true;
+            
+            try {
+                // Change API_URL to your deployed API URL
+                const API_URL = 'http://localhost:3000';
+                
+                const response = await fetch(`${API_URL}/screenshot`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const imageUrl = URL.createObjectURL(blob);
+                    
+                    result.innerHTML = `
+                        <div class="success">✅ Screenshot captured successfully!</div>
+                        <img src="${imageUrl}" alt="Screenshot" />
+                        <a href="${imageUrl}" download="screenshot.${data.format}" class="download-btn">
+                            💾 Download Screenshot
+                        </a>
+                    `;
+                } else {
+                    const error = await response.json();
+                    result.innerHTML = `
+                        <div class="error">
+                            ❌ Error: ${error.error || 'Failed to capture screenshot'}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                result.innerHTML = `
+                    <div class="error">
+                        ❌ Network Error: ${error.message}
+                        <br><br>
+                        Make sure your API server is running on http://localhost:3000
+                    </div>
+                `;
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
